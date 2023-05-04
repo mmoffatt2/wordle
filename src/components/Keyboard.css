@@ -1,0 +1,13 @@
+.wordleKeyboard {
+  font-size: 16px;
+  margin-top: 40px;
+}
+
+.wordleKeyboard button {
+  width:  55px;
+  height: 55px;
+  margin: 3px;
+  padding: 1px;
+  box-shadow: 1px 2px 5px rgb(102, 68, 68);
+  text-transform: uppercase;
+}

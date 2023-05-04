@@ -1,0 +1,6 @@
+.rowContainer {
+  display: grid;
+  grid-template-columns: 60px 60px 60px 60px 60px;
+  column-gap: 10px;
+  justify-content: center;
+}

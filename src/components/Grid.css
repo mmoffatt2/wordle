@@ -1,0 +1,9 @@
+
+.wordleGrid {
+  display: grid;
+  width: 100%;
+  font-size: 16px;
+  row-gap: 8px;
+  margin-left: auto;
+  margin-right: auto;
+}

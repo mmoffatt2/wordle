@@ -1,0 +1,27 @@
+.box-item {
+  border: 2px solid rgb(187, 181, 181);
+  width: 60px;
+  height: 60px;
+  font-size: 38px;
+  text-transform: uppercase;
+}
+
+.notChecked {
+  color: black;
+  background-color: white;
+}
+
+.match {
+  color: white;
+  background-color: rgb(16, 122, 16);
+}
+
+.inWord {
+  color: white;
+  background-color: rgb(223, 203, 29);
+}
+
+.notMatch {
+  color: white;
+  background-color: grey;
+}
