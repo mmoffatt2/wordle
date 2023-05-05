@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import './App.css'
 import Header from './components/Header';
 import Grid from './components/Grid';
@@ -37,6 +37,13 @@ function App() {
   const [col, setCol] = useState(-1);
   const [gameEnd, setGameEnd] = useState(false);
   const [keyboardColors, setKeyboardColors] = useState({});
+ 
+  console.log(letterList);
+
+  useEffect(() => {
+    document.addEventListener('keydown', btnClicked, true)
+  }, []);
+
   // const handleKeyPress = (event) => {
   //   console.log('event');
   //   if (event.key === 'Enter') {
@@ -87,7 +94,18 @@ function App() {
   }
 
   function btnClicked(event) {
-    switch (event.target.innerHTML) {
+    console.log(event.type);
+    // console.log(event);
+    let key;
+    if (event.type === 'keydown') {
+      key = event.key;
+    } else if (event.type === 'click') {
+      key = event.target.innerHTML;
+    }
+    console.log(key);
+    console.log(typeof key);
+
+    switch (key) {
       case 'Enter':
         if (col >= 4 && !gameEnd) {
           let lastRow = letterList[letterList.length-1];
@@ -115,45 +133,47 @@ function App() {
           if (allMatch(lastRow)) {
             // popup: you win!
             setGameEnd(true);
-            setLetterList([...letterList]);
+            setLetterList((oldLetterList) => [...oldLetterList]);
             console.log('You won!!!!!!');
           }
           else if (row >= 5) {
             // popup: you failed!
             setGameEnd(true);
-            setLetterList([...letterList]);
+            setLetterList((oldLetterList) => [...oldLetterList]);
             console.log('Game over, try again?');
           } else {
             // go to next row
             setCol(-1);
-            setRow(row+1);
-            letterList.push([]);
-            setLetterList([...letterList]);
+            setRow((prevRow) => prevRow+1);
+            // letterList.push([]);
+            setLetterList((oldLetterList) => [...oldLetterList, []]);
           }
         }
         break;
       case 'Del':
         if (col >= 0 && !gameEnd) {
-          setCol(col-1);
-          letterList[row].pop();
-          setLetterList([...letterList]);
+          setCol((prevCol) => prevCol-1);
+          // letterList[row].pop();
+          setLetterList((oldLetterList) => {
+            oldLetterList[row].pop();
+            return [...oldLetterList];
+          });
         }
         break;
       default:
         if (col < 4) {
-          setCol(col+1);
-          letterList[row].push({letter: event.target.innerHTML, match: 'notChecked'});
-          setLetterList([...letterList]);
+          setCol((prevCol) => prevCol + 1);
+          // letterList[row].push({letter: key, match: 'notChecked'});
+          setLetterList((oldLetterList) => {
+            oldLetterList[row].push({letter: key, match: 'notChecked'});
+            return [...oldLetterList];
+          });
         }
     }
   }
 
-  function keyEntered(event) {
-    console.log(event);
-  }
-
   return (
-    <div onKeyUp={keyEntered}>
+    <div>
       <Header />
       <Grid letterList={letterList} row={row} col={col} />
       <Keyboard keyboardColors={keyboardColors} btnClicked={btnClicked}/>

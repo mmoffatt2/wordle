@@ -10,3 +10,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>,
 )
+
+
+/*
+TODO:
+Prevent other keys (such as arrow keys or punctuation)
+
+*/
