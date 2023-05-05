@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import './App.css'
 import Header from './components/Header';
 import Grid from './components/Grid';
@@ -39,9 +39,22 @@ function App() {
   const [keyboardColors, setKeyboardColors] = useState({});
  
   console.log(letterList);
+  console.log(col)
 
+  const testType = ({ key }) => {
+    console.log(key)
+    let cpyList = [...letterList]
+    cpyList[row].push({letter: key, match: 'notChecked'});
+    setLetterList(cpyList)
+    // setLetterList((oldLetterList) => {
+    //   oldLetterList[row].push({letter: key, match: 'notChecked'});
+    //   return [...oldLetterList];
+    // });
+  }
   useEffect(() => {
     document.addEventListener('keydown', btnClicked, true)
+
+    return () => document.removeEventListener('keydown', btnClicked)
   }, []);
 
   // const handleKeyPress = (event) => {
@@ -76,6 +89,7 @@ function App() {
   }
 
   function updateKeyboardColors(letterList) {
+    // let cpyKeyboardColors = keyboardColors
     for (let row=0; row<letterList.length; row++) {
       for (let col=0; col<letterList[row].length; col++) {
         let letter = letterList[row][col].letter;
@@ -93,12 +107,15 @@ function App() {
     setKeyboardColors(keyboardColors);
   }
 
-  function btnClicked(event) {
+  const btnClicked = (event) => {
     console.log(event.type);
     // console.log(event);
     let key;
     if (event.type === 'keydown') {
       key = event.key;
+      if (key === 'Backspace') {
+        key = 'Del';
+      }
     } else if (event.type === 'click') {
       key = event.target.innerHTML;
     }
@@ -107,8 +124,9 @@ function App() {
 
     switch (key) {
       case 'Enter':
+        let cpyList = [...letterList];
         if (col >= 4 && !gameEnd) {
-          let lastRow = letterList[letterList.length-1];
+          let lastRow = cpyList[cpyList.length-1];
           for (let i=0; i<lastRow.length; i++) {
             if (lastRow[i].letter === wordOfTheDay[i]) {
               wordOfTheDayObj[lastRow[i].letter] -= 1;
@@ -128,46 +146,50 @@ function App() {
             }
           }
           
-          updateKeyboardColors(letterList);
+          updateKeyboardColors(cpyList);
 
           if (allMatch(lastRow)) {
             // popup: you win!
             setGameEnd(true);
-            setLetterList((oldLetterList) => [...oldLetterList]);
+            setLetterList(cpyList);
             console.log('You won!!!!!!');
           }
           else if (row >= 5) {
             // popup: you failed!
             setGameEnd(true);
-            setLetterList((oldLetterList) => [...oldLetterList]);
+            setLetterList(cpyList);
             console.log('Game over, try again?');
           } else {
             // go to next row
             setCol(-1);
             setRow((prevRow) => prevRow+1);
             // letterList.push([]);
-            setLetterList((oldLetterList) => [...oldLetterList, []]);
+            setLetterList([...cpyList, []]);
           }
         }
         break;
       case 'Del':
+        console.log("got here")
+        console.log("col:, ", col)
         if (col >= 0 && !gameEnd) {
-          setCol((prevCol) => prevCol-1);
-          // letterList[row].pop();
-          setLetterList((oldLetterList) => {
-            oldLetterList[row].pop();
-            return [...oldLetterList];
-          });
+          setCol((prevCol) => prevCol - 1);
+          let cpyList = [...letterList];
+          cpyList[row].pop();
+          setLetterList(cpyList);
+          // setLetterList((oldLetterList) => oldLetterList[row].slice(0, -1));
         }
         break;
       default:
         if (col < 4) {
           setCol((prevCol) => prevCol + 1);
+          let cpyList = [...letterList];
+          cpyList[row].push({letter: key, match: 'notChecked'});
+          setLetterList(cpyList);
           // letterList[row].push({letter: key, match: 'notChecked'});
-          setLetterList((oldLetterList) => {
-            oldLetterList[row].push({letter: key, match: 'notChecked'});
-            return [...oldLetterList];
-          });
+          // setLetterList((oldLetterList) => {
+          //   oldLetterList[row].push({letter: key, match: 'notChecked'});
+          //   return [...oldLetterList];
+          // });
         }
     }
   }
