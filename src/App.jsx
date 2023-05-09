@@ -5,20 +5,16 @@ import Grid from './components/Grid';
 import Keyboard from './components/Keyboard';
 import raw from '../data/wordles200.txt';
 
-let wordList;
 
-function readFile() {
-  fetch(raw)
-  .then(r => r.text())
-  .then(text => {
-    wordList = text.split('\r\n')
-    // console.log('text decoded:', text);
-    // console.log(wordList);
-    // return wordList;
-  });
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-readFile();
+// let wordOfTheDay = "";
+// let wordOfTheDay = downloadDictionary().then();
+// console.log(wordOfTheDay)
 // console.log(wordList);
 
 function App() {
@@ -42,27 +38,48 @@ function App() {
   });
   const [gameEnd, setGameEnd] = useState(false);
   const [keyboardColors, setKeyboardColors] = useState({});
+  const [wordOfTheDay, setWordOfTheDay] = useState("");
   const maxCol = 5;
   const maxRow = 6;
 
   console.log("App", gridState.letterList);
   console.log(`App: (${gridState.row}, ${gridState.col})`);
 
-  const testFunc = (e) => {
-    console.log(e.key)
-    // btnClicked(e)
-  }
 
+  useEffect(() => {
+    // Declare a boolean flag that we can use to cancel the API request.
+    let ignoreStaleRequest = false;
 
-  // useEffect(() => {
-  //   console.log("Mounted")
-  //   window.addEventListener('keydown', btnClicked, true);
+    // Call REST API to get the post's information
+    fetch(raw, { credentials: "same-origin" })
+      .then((response) => {
+        if (!response.ok) throw Error(response.statusText);
+        return response.text();
+      })
+      .then((data) => {
+        // If ignoreStaleRequest was set to true, we want to ignore the results of the
+        // the request. Otherwise, update the state to trigger a new render.
+        if (!ignoreStaleRequest) {
+          // read response stream as text
+          let wordList = data.split("\n");
+          let maxWords = wordList.length;
+          let wordNumber = getRandomInt(0, maxWords);
+          console.log(wordList[wordNumber])
+          setWordOfTheDay(wordList[wordNumber]);
+        }
+      })
+      .catch((error) => console.log(error));
 
-  //   return () => window.removeEventListener('keydown', btnClicked);
-  // }, []);
+    return () => {
+      // This is a cleanup function that runs whenever the Post component
+      // unmounts or re-renders. If a Post is about to unmount or re-render, we
+      // should avoid updating state.
+      ignoreStaleRequest = true;
+    };
+  }, []);
 
   // const wordOfTheDay = 'stare';
-  const wordOfTheDay = 'alnak';
+  // const wordOfTheDay = 'alnak';
   // const wordOfTheDay = 'kakaa';
   // const wordOfTheDay = 'kbbbk';
   function countLetters(word) {
@@ -103,7 +120,6 @@ function App() {
   }
 
   const btnClicked = (event) => {
-    console.log(event.type);
     let key;
     if (event.type === 'keydown') {
       key = event.key;
@@ -114,11 +130,12 @@ function App() {
       key = event.target.innerHTML;
     }
     console.log(key);
+
     // console.log(typeof key);
 
     switch (key) {
       case 'Enter': {
-        console.log(`Enter: (${gridState.row}, ${gridState.col})`);
+        // console.log(`Enter: (${gridState.row}, ${gridState.col})`);
         let cpyList = [...gridState.letterList];
         if (gridState.col >= 4 && !gameEnd) {
           for (let i=gridState.row*maxCol, j=0; i<gridState.row*maxCol+maxCol; i++, j++) {
@@ -167,7 +184,7 @@ function App() {
         break;
       }
       case 'Del': {
-        console.log(`Del: (${gridState.row}, ${gridState.col})`);
+        // console.log(`Del: (${gridState.row}, ${gridState.col})`);
         if (gridState.col >= 0 && !gameEnd) {
           // setCol((prevCol) => prevCol - 1);
           // let cpyList = [...gridState.letterList];
@@ -184,17 +201,20 @@ function App() {
         break;
       }
       default: {
-        // console.log(`default key: (${gridState.row}, ${gridState.col})`);
-        setGridState((oldGridState) => {
-          // console.log(`oldGridState: (${oldGridState.row}, ${oldGridState.col})`);
-          if (oldGridState.col < maxCol-1) {
-            return {
-              letterList: [...oldGridState.letterList, {letter: key, match: 'notChecked'}],
-              col: oldGridState.col + 1,
-              row: oldGridState.row
-            }
-          } else return oldGridState; // don't change anything
-        });
+        // regular expressions: only allow a-z or A-Z
+        if (/^[A-Za-z]$/.test(key)) {
+          // console.log(`default key: (${gridState.row}, ${gridState.col})`);
+          setGridState((oldGridState) => {
+            // console.log(`oldGridState: (${oldGridState.row}, ${oldGridState.col})`);
+            if (oldGridState.col < maxCol-1) {
+              return {
+                letterList: [...oldGridState.letterList, {letter: key, match: 'notChecked'}],
+                col: oldGridState.col + 1,
+                row: oldGridState.row
+              }
+            } else return oldGridState; // don't change anything
+          });
+        }
       }
     }
   }
