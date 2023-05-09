@@ -12,16 +12,46 @@
 }
 
 .match {
-  color: white;
-  background-color: rgb(16, 122, 16);
+  --color: white;
+  --background-color: rgb(16, 122, 16);
+  animation: flip 0.5s ease forwards;
 }
 
 .inWord {
-  color: white;
-  background-color: rgb(223, 203, 29);
+  --color: white;
+  --background-color: rgb(223, 203, 29);
+  animation: flip 0.5s ease forwards;
 }
 
 .notMatch {
-  color: white;
-  background-color: grey;
+  --color: white;
+  --background-color: grey;
+  animation: flip 0.5s ease forwards;
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateX(0);
+    background: white;
+    border-color: black;
+    /* color: black;
+    background-color: white; */
+  }
+  45% {
+    transform: rotateX(90deg);
+    background: white;
+    border-color: black;
+    /* color: black;
+    background-color: white; */
+  }
+  65% {
+    transform: rotateX(90deg);
+    color: var(--color);
+    background-color: var(--background-color);
+  }
+  100% {
+    transform: rotateX(0);
+    color: var(--color);
+    background-color: var(--background-color);
+  }
 }

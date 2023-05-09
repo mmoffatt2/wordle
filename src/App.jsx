@@ -159,7 +159,6 @@ function App() {
     } else if (event.type === 'click') {
       key = event.target.innerHTML;
     }
-    console.log(key);
 
     // console.log(typeof key);
 
@@ -171,7 +170,7 @@ function App() {
         if (!allowedWords.includes(guess)) {
           break;
         }
-        
+
         let cpyList = [...gridState.letterList];
         if (gridState.col >= 4 && !gameEnd) {
           for (let i=gridState.row*maxCol, j=0; i<gridState.row*maxCol+maxCol; i++, j++) {
@@ -237,8 +236,9 @@ function App() {
         break;
       }
       default: {
-        // regular expressions: only allow a-z or A-Z
-        if (/^[A-Za-z]$/.test(key)) {
+        // regular expressions: only allow a-z
+        key = key.toLowerCase()
+        if (/^[a-z]$/.test(key)) {
           // console.log(`default key: (${gridState.row}, ${gridState.col})`);
           setGridState((oldGridState) => {
             // console.log(`oldGridState: (${oldGridState.row}, ${oldGridState.col})`);
