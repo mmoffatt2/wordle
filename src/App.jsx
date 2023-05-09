@@ -3,7 +3,8 @@ import './App.css'
 import Header from './components/Header';
 import Grid from './components/Grid';
 import Keyboard from './components/Keyboard';
-import raw from '../data/wordles200.txt';
+import raw from '../data/wordles.txt';
+import allowed from '../data/combined_wordlist.txt';
 
 
 function getRandomInt(min, max) {
@@ -39,6 +40,7 @@ function App() {
   const [gameEnd, setGameEnd] = useState(false);
   const [keyboardColors, setKeyboardColors] = useState({});
   const [wordOfTheDay, setWordOfTheDay] = useState("");
+  const [allowedWords, setAllowedWords] = useState([])
   const maxCol = 5;
   const maxRow = 6;
 
@@ -66,6 +68,34 @@ function App() {
           let wordNumber = getRandomInt(0, maxWords);
           console.log(wordList[wordNumber])
           setWordOfTheDay(wordList[wordNumber]);
+        }
+      })
+      .catch((error) => console.log(error));
+
+    return () => {
+      // This is a cleanup function that runs whenever the Post component
+      // unmounts or re-renders. If a Post is about to unmount or re-render, we
+      // should avoid updating state.
+      ignoreStaleRequest = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    // Declare a boolean flag that we can use to cancel the API request.
+    let ignoreStaleRequest = false;
+
+    // Call REST API to get the post's information
+    fetch(allowed, { credentials: "same-origin" })
+      .then((response) => {
+        if (!response.ok) throw Error(response.statusText);
+        return response.text();
+      })
+      .then((data) => {
+        // If ignoreStaleRequest was set to true, we want to ignore the results of the
+        // the request. Otherwise, update the state to trigger a new render.
+        if (!ignoreStaleRequest) {
+          // read response stream as text
+          setAllowedWords(data.split("\n"));
         }
       })
       .catch((error) => console.log(error));
@@ -136,6 +166,12 @@ function App() {
     switch (key) {
       case 'Enter': {
         // console.log(`Enter: (${gridState.row}, ${gridState.col})`);
+        let letters = gridState.letterList.map(obj => obj.letter)
+        let guess = letters.slice(gridState.row*maxCol, gridState.row*maxCol+maxCol).join('')
+        if (!allowedWords.includes(guess)) {
+          break;
+        }
+        
         let cpyList = [...gridState.letterList];
         if (gridState.col >= 4 && !gameEnd) {
           for (let i=gridState.row*maxCol, j=0; i<gridState.row*maxCol+maxCol; i++, j++) {
