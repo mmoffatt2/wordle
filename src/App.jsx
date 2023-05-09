@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useRef, useEffect, useState} from 'react';
 import './App.css'
 import Header from './components/Header';
 import Grid from './components/Grid';
@@ -48,11 +48,18 @@ function App() {
   console.log("App", gridState.letterList);
   console.log(`App: (${gridState.row}, ${gridState.col})`);
 
-  useEffect(() => {
-    document.addEventListener('keydown', btnClicked, true);
+  const testFunc = (e) => {
+    console.log(e.key)
+    // btnClicked(e)
+  }
 
-    return () => document.removeEventListener('keydown', btnClicked);
-  }, []);
+
+  // useEffect(() => {
+  //   console.log("Mounted")
+  //   window.addEventListener('keydown', btnClicked, true);
+
+  //   return () => window.removeEventListener('keydown', btnClicked);
+  // }, []);
 
   // const wordOfTheDay = 'stare';
   const wordOfTheDay = 'alnak';
@@ -163,12 +170,12 @@ function App() {
         console.log(`Del: (${gridState.row}, ${gridState.col})`);
         if (gridState.col >= 0 && !gameEnd) {
           // setCol((prevCol) => prevCol - 1);
-          let cpyList = [...gridState.letterList];
-          cpyList[gridState.row].pop();
+          // let cpyList = [...gridState.letterList];
+          // cpyList[gridState.row].pop();
           // setLetterList(cpyList);
           setGridState((oldGridState) => {
             return {
-              letterList: [...cpyList],
+              letterList: oldGridState.letterList.slice(0, -1),
               col: oldGridState.col - 1,
               row: oldGridState.row
             }
@@ -191,6 +198,14 @@ function App() {
       }
     }
   }
+
+  const cbRef = useRef(btnClicked);
+  useEffect(() => { cbRef.current = btnClicked; }); // update each render
+  useEffect(() => {
+      const cb = e => cbRef.current(e); // then use most recent cb value
+      window.addEventListener("keydown", cb);
+      return () => { window.removeEventListener("keydown", cb) };
+  }, []);
 
   return (
     <div>
