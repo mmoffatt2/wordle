@@ -95,7 +95,7 @@ function App() {
         // the request. Otherwise, update the state to trigger a new render.
         if (!ignoreStaleRequest) {
           // read response stream as text
-          setAllowedWords(data.split("\n"));
+          setAllowedWords(data.split("\n").map(s => s.trim()));
         }
       })
       .catch((error) => console.log(error));
