@@ -28,46 +28,36 @@ function App() {
     match: match / in word / not match
   }
 
-   [<Box letter=A />, B, C, D, E,
-    F, G, H, I, J
-   ]
+  {
+    letterList: [[<Box letter=A />, B, C, D, E,
+                 [F, G, H, I, J]],
+    row: row,
+    col: col
+  }
   */
-  const [letterList, setLetterList] = useState([[]]);
-  const [row, setRow] = useState(0);
-  const [col, setCol] = useState(-1);
+  const [gridState, setGridState] = useState({
+    letterList: [],
+    row: 0,
+    col: -1
+  });
   const [gameEnd, setGameEnd] = useState(false);
   const [keyboardColors, setKeyboardColors] = useState({});
- 
-  console.log(letterList);
-  console.log(col)
+  const maxCol = 5;
+  const maxRow = 6;
 
-  const testType = ({ key }) => {
-    console.log(key)
-    let cpyList = [...letterList]
-    cpyList[row].push({letter: key, match: 'notChecked'});
-    setLetterList(cpyList)
-    // setLetterList((oldLetterList) => {
-    //   oldLetterList[row].push({letter: key, match: 'notChecked'});
-    //   return [...oldLetterList];
-    // });
-  }
+  console.log("App", gridState.letterList);
+  console.log(`App: (${gridState.row}, ${gridState.col})`);
+
   useEffect(() => {
-    document.addEventListener('keydown', btnClicked, true)
+    document.addEventListener('keydown', btnClicked, true);
 
-    return () => document.removeEventListener('keydown', btnClicked)
+    return () => document.removeEventListener('keydown', btnClicked);
   }, []);
 
-  // const handleKeyPress = (event) => {
-  //   console.log('event');
-  //   if (event.key === 'Enter') {
-  //     console.log('got enter');
-  //   }
-  // };
   // const wordOfTheDay = 'stare';
-  
   const wordOfTheDay = 'alnak';
-  // kakaa
-  // kbbbk
+  // const wordOfTheDay = 'kakaa';
+  // const wordOfTheDay = 'kbbbk';
   function countLetters(word) {
     let targetObj = {};
     for (let c of word) {
@@ -89,19 +79,17 @@ function App() {
   }
 
   function updateKeyboardColors(letterList) {
-    // let cpyKeyboardColors = keyboardColors
-    for (let row=0; row<letterList.length; row++) {
-      for (let col=0; col<letterList[row].length; col++) {
-        let letter = letterList[row][col].letter;
-        let state = letterList[row][col].match;
-        if (keyboardColors[letter] === 'match') { /* never downgrade a match */}
-        else if (keyboardColors[letter] === 'inWord') {
-          /* only switch from partial match to full match */
-          if (state === 'match') keyboardColors[letter] = state;
-        } else {
-          /* notMatch or never matched yet, go ahead and set it */
-          keyboardColors[letter] = state;
-        }
+    // console.log("updateKeyboardColors", letterList);
+    for (let i=0; i<letterList.length; i++) {
+      let letter = letterList[i].letter;
+      let state = letterList[i].match;
+      if (keyboardColors[letter] === 'match') { /* never downgrade a match */}
+      else if (keyboardColors[letter] === 'inWord') {
+        /* only switch from partial match to full match */
+        if (state === 'match') keyboardColors[letter] = state;
+      } else {
+        /* notMatch or never matched yet, go ahead and set it */
+        keyboardColors[letter] = state;
       }
     }
     setKeyboardColors(keyboardColors);
@@ -109,7 +97,6 @@ function App() {
 
   const btnClicked = (event) => {
     console.log(event.type);
-    // console.log(event);
     let key;
     if (event.type === 'keydown') {
       key = event.key;
@@ -120,114 +107,98 @@ function App() {
       key = event.target.innerHTML;
     }
     console.log(key);
-    console.log(typeof key);
+    // console.log(typeof key);
 
     switch (key) {
-      case 'Enter':
-        let cpyList = [...letterList];
-        if (col >= 4 && !gameEnd) {
-          let lastRow = cpyList[cpyList.length-1];
-          for (let i=0; i<lastRow.length; i++) {
-            if (lastRow[i].letter === wordOfTheDay[i]) {
-              wordOfTheDayObj[lastRow[i].letter] -= 1;
-              lastRow[i].match = 'match';
+      case 'Enter': {
+        console.log(`Enter: (${gridState.row}, ${gridState.col})`);
+        let cpyList = [...gridState.letterList];
+        if (gridState.col >= 4 && !gameEnd) {
+          for (let i=gridState.row*maxCol, j=0; i<gridState.row*maxCol+maxCol; i++, j++) {
+            if (cpyList[i].letter === wordOfTheDay[j]) {
+              wordOfTheDayObj[cpyList[i].letter] -= 1;
+              cpyList[i].match = 'match';
             }
           }
           
-          for (let i=0; i<lastRow.length; i++) {
-            if (lastRow[i].match !== 'match') {
-              if (Object.prototype.hasOwnProperty.call(wordOfTheDayObj, lastRow[i].letter) &&
-                  wordOfTheDayObj[lastRow[i].letter] > 0) {
-                    wordOfTheDayObj[lastRow[i].letter] -= 1;
-                    lastRow[i].match = 'inWord';
+          for (let i=gridState.row*maxCol; i<gridState.row*maxCol+maxCol; i++) {
+            if (cpyList[i].match !== 'match') {
+              if (Object.prototype.hasOwnProperty.call(wordOfTheDayObj, cpyList[i].letter) &&
+                  wordOfTheDayObj[cpyList[i].letter] > 0) {
+                    wordOfTheDayObj[cpyList[i].letter] -= 1;
+                    cpyList[i].match = 'inWord';
               } else {
-                lastRow[i].match = 'notMatch';
+                cpyList[i].match = 'notMatch';
               }
             }
           }
           
           updateKeyboardColors(cpyList);
 
-          if (allMatch(lastRow)) {
+          if (allMatch(cpyList.slice(gridState.row*maxCol, gridState.row*maxCol+maxCol))) {
             // popup: you win!
             setGameEnd(true);
-            setLetterList(cpyList);
+            // setLetterList(cpyList);
             console.log('You won!!!!!!');
           }
-          else if (row >= 5) {
+          else if (gridState.row >= 5) {
             // popup: you failed!
             setGameEnd(true);
-            setLetterList(cpyList);
+            // setLetterList(cpyList);
             console.log('Game over, try again?');
           } else {
             // go to next row
-            setCol(-1);
-            setRow((prevRow) => prevRow+1);
-            // letterList.push([]);
-            setLetterList([...cpyList, []]);
+            setGridState((oldGridState) => {
+              return {
+                letterList: [...cpyList],
+                col: -1,
+                row: oldGridState.row + 1
+              }
+            });
           }
         }
         break;
-      case 'Del':
-        console.log("got here")
-        console.log("col:, ", col)
-        if (col >= 0 && !gameEnd) {
-          setCol((prevCol) => prevCol - 1);
-          let cpyList = [...letterList];
-          cpyList[row].pop();
-          setLetterList(cpyList);
-          // setLetterList((oldLetterList) => oldLetterList[row].slice(0, -1));
+      }
+      case 'Del': {
+        console.log(`Del: (${gridState.row}, ${gridState.col})`);
+        if (gridState.col >= 0 && !gameEnd) {
+          // setCol((prevCol) => prevCol - 1);
+          let cpyList = [...gridState.letterList];
+          cpyList[gridState.row].pop();
+          // setLetterList(cpyList);
+          setGridState((oldGridState) => {
+            return {
+              letterList: [...cpyList],
+              col: oldGridState.col - 1,
+              row: oldGridState.row
+            }
+          });
         }
         break;
-      default:
-        if (col < 4) {
-          setCol((prevCol) => prevCol + 1);
-          let cpyList = [...letterList];
-          cpyList[row].push({letter: key, match: 'notChecked'});
-          setLetterList(cpyList);
-          // letterList[row].push({letter: key, match: 'notChecked'});
-          // setLetterList((oldLetterList) => {
-          //   oldLetterList[row].push({letter: key, match: 'notChecked'});
-          //   return [...oldLetterList];
-          // });
-        }
+      }
+      default: {
+        // console.log(`default key: (${gridState.row}, ${gridState.col})`);
+        setGridState((oldGridState) => {
+          // console.log(`oldGridState: (${oldGridState.row}, ${oldGridState.col})`);
+          if (oldGridState.col < maxCol-1) {
+            return {
+              letterList: [...oldGridState.letterList, {letter: key, match: 'notChecked'}],
+              col: oldGridState.col + 1,
+              row: oldGridState.row
+            }
+          } else return oldGridState; // don't change anything
+        });
+      }
     }
   }
 
   return (
     <div>
       <Header />
-      <Grid letterList={letterList} row={row} col={col} />
+      <Grid letterList={gridState.letterList} row={gridState.row} col={gridState.col} />
       <Keyboard keyboardColors={keyboardColors} btnClicked={btnClicked}/>
     </div>
   )
 }
 
 export default App
-
-
-
-
-// // check against word of the day
-// let lastRow = letterList[letterList.length-1];
-// let posDict = {};
-
-// let pos = 0;
-// for (let i=0; i<lastRow.length; i++) {
-//   console.log(lastRow[i], wordOfTheDay[i]);
-//   if (lastRow[i].letter in posDict) {
-//     pos = posDict[lastRow[i].letter] + 1;
-//   }
-//   if (lastRow[i].letter === wordOfTheDay[i]) {
-//     posDict[lastRow[i].letter] = wordOfTheDay.indexOf(lastRow[i].letter, pos);
-//     lastRow[i].match = 'match';
-//   }
-//   else {
-//     let indx = wordOfTheDay.indexOf(lastRow[i].letter, pos);
-//     if (indx !== -1) {
-//       posDict[lastRow[i].letter] = indx;
-//       lastRow[i].match = 'inWord';
-//     }
-//     else lastRow[i].match = 'notMatch';
-//   }
-// }
