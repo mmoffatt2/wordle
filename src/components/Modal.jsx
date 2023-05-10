@@ -1,13 +1,13 @@
 import "./Modal.css";
 
-function Modal({ youWin, resetGame, wordOfTheDay }) {
+function Modal({ youWin, setGameEnd, resetGame, winSteak, wordOfTheDay }) {
   return (
     <div className="modalBackground">
       <div className="modalContainer">
         <div className="titleCloseBtn">
           <button
             onClick={() => {
-                resetGame();
+                setGameEnd(false);
             }}
           >
             X
@@ -22,6 +22,9 @@ function Modal({ youWin, resetGame, wordOfTheDay }) {
           }
         </div>
         <div className="body">
+          {youWin &&
+            <p>Win Streak: {winSteak} </p>
+          }
           {!youWin &&
             <p>The word was {wordOfTheDay} </p>
           }

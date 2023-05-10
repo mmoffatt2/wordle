@@ -42,6 +42,7 @@ function App() {
   const [gameEnd, setGameEnd] = useState(false);
   const [youWin, setYouWin] = useState(false);
   const [numGameReset, setGameResets] = useState(0)
+  const [winStreak, setWinStreak] = useState(0)
   const [keyboardColors, setKeyboardColors] = useState({});
   const [wordOfTheDay, setWordOfTheDay] = useState("");
   const [allowedWords, setAllowedWords] = useState([])
@@ -214,12 +215,14 @@ function App() {
             // popup: you win!
             setGameEnd(true);
             setYouWin(true);
+            setWinStreak((prevStreak) => prevStreak+1)
             // setLetterList(cpyList);
             console.log('You won!!!!!!');
           }
           else if (gridState.row >= 5) {
             // popup: you failed!
             setGameEnd(true);
+            setWinStreak(0)
             // setLetterList(cpyList);
             console.log('Game over, try again?');
           } else {
@@ -286,7 +289,8 @@ function App() {
       <Grid letterList={gridState.letterList} row={gridState.row} col={gridState.col} />
       {youWin && <ConfettiExplosion width='1600' height='1600'/>}
       <Keyboard keyboardColors={keyboardColors} btnClicked={btnClicked}/>
-      {gameEnd && <Modal youWin={youWin} resetGame={resetGame} wordOfTheDay={wordOfTheDay}/>}
+      {gameEnd && <Modal youWin={youWin} setGameEnd={setGameEnd} 
+       resetGame={resetGame} winSteak={winStreak} wordOfTheDay={wordOfTheDay}/>}
     </div>
   )
 }
