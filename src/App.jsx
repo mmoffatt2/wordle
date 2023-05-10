@@ -1,11 +1,12 @@
 import {useRef, useEffect, useState} from 'react';
+import ConfettiExplosion from 'confetti-explosion-react';
+
 import './App.css'
 import Header from './components/Header';
 import Grid from './components/Grid';
 import Keyboard from './components/Keyboard';
 import raw from '../data/wordles.txt';
 import allowed from '../data/combined_wordlist.txt';
-
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -38,6 +39,7 @@ function App() {
     col: -1
   });
   const [gameEnd, setGameEnd] = useState(false);
+  const [youWin, setYouWin] = useState(false);
   const [keyboardColors, setKeyboardColors] = useState({});
   const [wordOfTheDay, setWordOfTheDay] = useState("");
   const [allowedWords, setAllowedWords] = useState([])
@@ -63,7 +65,7 @@ function App() {
         // the request. Otherwise, update the state to trigger a new render.
         if (!ignoreStaleRequest) {
           // read response stream as text
-          let wordList = data.split("\n");
+          let wordList = data.split("\n").map(s => s.trim());
           let maxWords = wordList.length;
           let wordNumber = getRandomInt(0, maxWords);
           console.log(wordList[wordNumber])
@@ -197,6 +199,7 @@ function App() {
           if (allMatch(cpyList.slice(gridState.row*maxCol, gridState.row*maxCol+maxCol))) {
             // popup: you win!
             setGameEnd(true);
+            setYouWin(true);
             // setLetterList(cpyList);
             console.log('You won!!!!!!');
           }
@@ -264,9 +267,10 @@ function App() {
   }, []);
 
   return (
-    <div>
+    <div className='wordle-container'>
       <Header />
       <Grid letterList={gridState.letterList} row={gridState.row} col={gridState.col} />
+      {youWin && <ConfettiExplosion width='1600' height='1600'/>}
       <Keyboard keyboardColors={keyboardColors} btnClicked={btnClicked}/>
     </div>
   )

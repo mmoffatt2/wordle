@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "confetti-explosion-react": "^0.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
