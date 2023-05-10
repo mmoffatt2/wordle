@@ -5,6 +5,7 @@ import './App.css'
 import Header from './components/Header';
 import Grid from './components/Grid';
 import Keyboard from './components/Keyboard';
+import Modal from './components/Modal'
 import raw from '../data/wordles.txt';
 import allowed from '../data/combined_wordlist.txt';
 
@@ -40,6 +41,7 @@ function App() {
   });
   const [gameEnd, setGameEnd] = useState(false);
   const [youWin, setYouWin] = useState(false);
+  const [numGameReset, setGameResets] = useState(0)
   const [keyboardColors, setKeyboardColors] = useState({});
   const [wordOfTheDay, setWordOfTheDay] = useState("");
   const [allowedWords, setAllowedWords] = useState([])
@@ -80,7 +82,7 @@ function App() {
       // should avoid updating state.
       ignoreStaleRequest = true;
     };
-  }, []);
+  }, [numGameReset]);
 
   useEffect(() => {
     // Declare a boolean flag that we can use to cancel the API request.
@@ -149,6 +151,18 @@ function App() {
       }
     }
     setKeyboardColors(keyboardColors);
+  }
+
+  function resetGame() {
+    setGridState({
+      letterList: [],
+      row: 0,
+      col: -1
+    });
+    setGameEnd(false);
+    setYouWin(false);
+    setGameResets((prevReset) => prevReset+1);
+    setKeyboardColors({});
   }
 
   const btnClicked = (event) => {
@@ -272,6 +286,7 @@ function App() {
       <Grid letterList={gridState.letterList} row={gridState.row} col={gridState.col} />
       {youWin && <ConfettiExplosion width='1600' height='1600'/>}
       <Keyboard keyboardColors={keyboardColors} btnClicked={btnClicked}/>
+      {gameEnd && <Modal youWin={youWin} resetGame={resetGame} wordOfTheDay={wordOfTheDay}/>}
     </div>
   )
 }
